@@ -2,9 +2,7 @@ import type { Metadata, Viewport } from "next";
 
 import { fontVariables } from "@/shared/lib/constants/fonts.constant";
 import { SITE } from "@/shared/lib/constants/site.constant";
-import { BackToTop } from "@/shared/layout/back-to-top";
-import { SiteFooter } from "@/shared/layout/site-footer";
-import { SiteHeader } from "@/shared/layout/site-header";
+import { PublicChrome } from "@/shared/layout/public-chrome";
 
 import "./globals.css";
 
@@ -33,10 +31,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang={SITE.lang} dir={SITE.dir} className={fontVariables}>
       <body className="overflow-x-hidden bg-white antialiased">
-        <SiteHeader />
-        {children}
-        <SiteFooter />
-        <BackToTop />
+        <PublicChrome>{children}</PublicChrome>
       </body>
     </html>
   );

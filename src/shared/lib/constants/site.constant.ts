@@ -9,9 +9,9 @@ export const SITE = {
   lang: "ar",
   dir: "rtl",
   url: process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000",
-  phone: process.env.NEXT_PUBLIC_PHONE ?? "+966 50 123 4567",
+  phone: process.env.NEXT_PUBLIC_PHONE ?? "+966501234567",
   email: process.env.NEXT_PUBLIC_EMAIL ?? "hello@wajha.sa",
-  whatsapp: process.env.NEXT_PUBLIC_WHATSAPP_URL ?? "https://wa.me/+966 50 123 4567",
+  whatsapp: process.env.NEXT_PUBLIC_WHATSAPP_URL ?? "https://wa.me/+966501234567",
   address: "الرياض، المملكة العربية السعودية",
   foundedYear: 2025,
 } as const;

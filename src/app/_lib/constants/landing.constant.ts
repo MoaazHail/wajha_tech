@@ -78,10 +78,12 @@ export const PROCESS_STEPS = [
 
 /** The rail tiles. The design ships them as empty slots with a caption only. */
 export const WORKS = [
-  { id: "work-1", caption: "موقع متجر إلكتروني" },
-  { id: "work-2", caption: "موقع عيادة طبية" },
-  { id: "work-3", caption: "موقع شركة استشارات" },
-  { id: "work-4", caption: "موقع شركة مقاولات" },
+  { id: "work-1", caption: "موقع اسئله", href: "/assets/images/exam-app.png", site: '' },
+  { id: "work-2", caption: "موقع عيادة طبية", href: "/assets/images/exam-app.png", site: ''  },
+  { id: "work-3", caption: "موقع شركة استشارات", href: "/assets/images/exam-app.png", site: '' },
+  { id: "work-4", caption: "موقع شركة مقاولات", href: "/assets/images/exam-app.png", site: '' },
+  { id: "work-5", caption: "موقع شركة استشارات", href: "/assets/images/exam-app.png", site: '' },
+  { id: "work-6", caption: "موقع شركة مقاولات", href: "/assets/images/exam-app.png", site: '' },
 ] as const;
 
 /** Faces in the hero's proof band. */

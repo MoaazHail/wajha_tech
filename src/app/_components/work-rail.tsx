@@ -6,6 +6,8 @@ import { Shell } from "@/shared/layout/shell";
 import { ChevronIcon } from "@/shared/ui/icons";
 
 import { WORKS } from "../_lib/constants/landing.constant";
+import Image from "next/image";
+import Link from "next/link";
 
 const arrowClass =
   "absolute top-1/2 flex size-[34px] -translate-y-1/2 items-center justify-center rounded-full bg-brand text-white shadow-[0_8px_20px_rgba(4,20,66,.45)] transition-colors hover:bg-brand-dark max-[640px]:hidden";
@@ -42,16 +44,18 @@ export function WorkRail() {
               className="no-scrollbar flex gap-[clamp(14px,1.8vw,24px)] overflow-x-auto pb-0.5 [scroll-snap-type:x_mandatory]"
             >
               {WORKS.map((work) => (
-                <figure
+                <Link
+                  href={work.site} 
+                  target="_blank"
                   key={work.id}
                   className="m-0 flex-[0_0_clamp(200px,23%,260px)] [scroll-snap-align:start]"
                 >
+                  <Image src={work.href} alt={work.caption} height={300} width={300} />
                   {/* Empty tile by design — drop the client screenshot in here. */}
-                  <div className="aspect-4/3 overflow-hidden rounded-lg border border-white/9 bg-night-tile" />
                   <figcaption className="mt-3 text-center text-[14.5px] font-medium text-white/85">
                     {work.caption}
                   </figcaption>
-                </figure>
+                </Link>
               ))}
             </div>
           </div>
