@@ -21,8 +21,10 @@ export function useActiveSection(hrefs: readonly string[]) {
 
   useEffect(() => {
     const readCurrent = () => {
+      const styles = getComputedStyle(document.documentElement);
       const headerOffset =
-        Number.parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--header-h")) || 0;
+        (Number.parseFloat(styles.getPropertyValue("--header-h")) || 0) +
+        (Number.parseFloat(styles.getPropertyValue("--admin-bar")) || 0);
       const line = window.scrollY + headerOffset + 12;
 
       // The last section whose top has passed under the header wins.

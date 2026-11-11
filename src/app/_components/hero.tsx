@@ -1,16 +1,25 @@
 import Image from "next/image";
 
 import { CtaArrow, CtaLink } from "@/shared/components/cta-link";
-import { SITE } from "@/shared/lib/constants/site.constant";
+import type { LandingSection } from "@/shared/lib/types/api";
 import { Shell } from "@/shared/layout/shell";
 
+import { BookingButton } from "./booking-button";
 import { HeroProofBand } from "./hero-proof-band";
 
-export function Hero() {
+interface HeroProps {
+  section: LandingSection;
+  /** The proof band under the buttons; omitted when the dashboard hides it. */
+  proof?: LandingSection;
+}
+
+export function Hero({ section, proof }: HeroProps) {
+  const content = section.contents[0];
+
   return (
     <section
       id="top"
-      className="relative flex min-h-[min(92vh,900px)] flex-col overflow-hidden bg-brand px-gutter pt-(--header-h) text-white max-[900px]:min-h-auto"
+      className="relative flex min-h-[min(92vh,900px)] flex-col overflow-hidden bg-brand px-gutter pt-[calc(var(--header-h)+var(--admin-bar))] text-white max-[900px]:min-h-auto"
     >
       {/* Decorative art, masked out towards the copy. Hidden below 900px. */}
       <Image
@@ -28,37 +37,28 @@ export function Hero() {
         <Shell>
           <div className="max-w-[min(600px,100%)] animate-rise">
             <p className="font-display text-sm font-medium tracking-[.06em] text-white/80">
-              موقع + ملف تعريفي لشركتك
+              {content?.badge}
             </p>
 
-            <h1 className="mt-5 text-[clamp(34px,4.4vw,62px)] font-bold leading-[1.45] tracking-[-0.02em] text-balance">
-              عميلك يحكم عليك
-              <br />
-              قبل أن يكلّمك.
+            <h1 className="mt-5 text-[clamp(34px,4.4vw,62px)] font-bold leading-[1.45] tracking-[-0.02em] whitespace-pre-line text-balance">
+              {content?.title}
             </h1>
 
             <p className="mt-6 text-[clamp(12px,1.02vw,15px)] leading-[1.7] whitespace-nowrap text-white/85 max-[760px]:text-base max-[760px]:leading-[1.85] max-[760px]:whitespace-normal">
-              واجهة رقمية وبروفايل بهوية واحدة، يجعلان قرار التعامل معك محسوماً من أول نظرة.
+              {content?.body}
             </p>
 
             <div className="mt-9 flex flex-wrap gap-3.5">
-              <CtaLink
-                href={SITE.whatsapp}
-                target="_blank"
-                rel="noreferrer"
-                tone="white"
-                size="xl"
-                shape="cut"
-              >
-                اطلب موقعك الآن
+              <BookingButton tone="white" size="xl" shape="cut">
+                {content?.cta?.label ?? "اطلب موقعك الآن"}
                 <CtaArrow className="text-sm" />
-              </CtaLink>
+              </BookingButton>
               <CtaLink href="#work" tone="outline" size="xl" shape="square" className="font-medium">
                 شاهد نماذج الأعمال
               </CtaLink>
             </div>
 
-            <HeroProofBand />
+            {proof && <HeroProofBand section={proof} />}
           </div>
         </Shell>
       </div>

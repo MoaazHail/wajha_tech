@@ -1,7 +1,6 @@
 import { Band } from "@/shared/layout/shell";
+import type { LandingSection } from "@/shared/lib/types/api";
 import { AwardIcon, BriefIcon, DesignIcon, TestIcon } from "@/shared/ui/icons";
-
-import { PROCESS_STEPS } from "../_lib/constants/landing.constant";
 
 const ICONS = {
   brief: BriefIcon,
@@ -10,12 +9,12 @@ const ICONS = {
   award: AwardIcon,
 } as const;
 
-export function Process() {
+export function Process({ section }: { section: LandingSection }) {
   return (
     <Band className="bg-white">
       <div className="text-center">
-        <h2 className="text-[clamp(23px,2.6vw,34px)] font-bold">كيف نعمل؟</h2>
-        <p className="mt-2.5 text-[15.5px] text-muted">عملية واضحة وشفافة من البداية للنهاية</p>
+        <h2 className="text-[clamp(23px,2.6vw,34px)] font-bold">{section.title}</h2>
+        {section.subtitle && <p className="mt-2.5 text-[15.5px] text-muted">{section.subtitle}</p>}
       </div>
 
       <div className="relative mt-[clamp(30px,3.6vw,52px)]">
@@ -26,11 +25,11 @@ export function Process() {
         />
 
         <ol className="relative grid grid-cols-4 gap-[clamp(14px,2vw,28px)] max-[900px]:grid-cols-2 max-[900px]:gap-y-[clamp(30px,4vw,44px)] max-[640px]:grid-cols-1">
-          {PROCESS_STEPS.map((step) => {
-            const Icon = ICONS[step.icon];
+          {section.contents.map((step) => {
+            const Icon = ICONS[step.icon as keyof typeof ICONS] ?? BriefIcon;
 
             return (
-              <li key={step.num} className="relative flex flex-col items-center text-center">
+              <li key={step.id} className="relative flex flex-col items-center text-center">
                 <div className="relative">
                   <div className="flex size-[clamp(84px,7.2vw,104px)] items-center justify-center rounded-full border border-line bg-white text-brand shadow-[0_10px_26px_rgba(13,86,242,.09)]">
                     <Icon />

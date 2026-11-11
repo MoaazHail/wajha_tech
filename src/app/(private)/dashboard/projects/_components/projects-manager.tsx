@@ -1,24 +1,52 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useTransition } from "react";
 
 import { DataTable } from "@/shared/components/data-table";
+import type { Client, Plan, Project } from "@/shared/lib/types/api";
 
-import { useProjects } from "../../_lib/hooks/use-projects";
+import {
+  createProjectAction,
+  deleteProjectAction,
+  updateProjectAction,
+} from "../../_lib/actions/projects.action";
+import type { ProjectInput } from "../../_lib/schemes/project.scheme";
+import type { ActionResult } from "../../_lib/types/action";
 import { ProjectForm } from "./project-form";
 import { PROJECT_COLUMNS } from "./projects-columns";
-import type { Project } from "../../_lib/constants/dashboard-data.constant";
+
+interface ProjectsManagerProps {
+  projects: ReadonlyArray<Project>;
+  clients: ReadonlyArray<Client>;
+  plans: ReadonlyArray<Plan>;
+}
 
 /** The projects table with add, edit and delete. */
-export function ProjectsManager() {
-  const { projects, add, update, remove } = useProjects();
+export function ProjectsManager({ projects, clients, plans }: ProjectsManagerProps) {
   const [formOpen, setFormOpen] = useState(false);
   const [editing, setEditing] = useState<Project | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [, startTransition] = useTransition();
 
-  const closeForm = () => setFormOpen(false);
+  const submit = async (data: ProjectInput): Promise<ActionResult> =>
+    editing ? updateProjectAction(editing.id, data) : createProjectAction(data);
+
+  const remove = (row: Project) => {
+    setError(null);
+    startTransition(async () => {
+      const result = await deleteProjectAction(row.id);
+      if (!result.ok) setError(result.error);
+    });
+  };
 
   return (
     <>
+      {error && (
+        <p role="alert" className="text-sm text-red-300">
+          {error}
+        </p>
+      )}
+
       <DataTable
         columns={PROJECT_COLUMNS}
         rows={projects}
@@ -32,21 +60,19 @@ export function ProjectsManager() {
           setEditing(row);
           setFormOpen(true);
         }}
-        onDelete={(row) => remove(row.id)}
-        deleteMessage={(row) => `هل أنت متأكد من حذف «${row.name}»؟ لا يمكن التراجع عن هذا الإجراء.`}
+        onDelete={remove}
+        deleteMessage={(row) => `هل أنت متأكد من حذف «${row.title}»؟ لا يمكن التراجع عن هذا الإجراء.`}
         emptyText="لا توجد مشاريع بعد"
-      theme="dark"
+        theme="dark"
       />
 
       <ProjectForm
         open={formOpen}
         project={editing}
-        onClose={closeForm}
-        onSubmit={(data) => {
-          if (editing) update(editing.id, data);
-          else add(data);
-          closeForm();
-        }}
+        clients={clients}
+        plans={plans}
+        onClose={() => setFormOpen(false)}
+        onSubmit={submit}
       />
     </>
   );

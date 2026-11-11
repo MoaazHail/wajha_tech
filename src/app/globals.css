@@ -27,6 +27,8 @@
   /* The fixed header's height. The hero pads by it and anchors offset by it,
      so it has to be a known number rather than whatever the content measures. */
   --header-h: 68px;
+  /* Height of the admin-only strip above the header; 0 for everyone else (set on <html>). */
+  --admin-bar: 0px;
 }
 
 @media (min-width: 768px) {
@@ -42,7 +44,7 @@ html {
 
 /* Keep anchored sections clear of the fixed header. */
 section[id] {
-  scroll-margin-top: calc(var(--header-h) + 8px);
+  scroll-margin-top: calc(var(--header-h) + var(--admin-bar) + 8px);
 }
 
 body {

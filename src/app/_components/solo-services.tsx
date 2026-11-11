@@ -1,34 +1,36 @@
 import Image from "next/image";
 
 import { CtaLink } from "@/shared/components/cta-link";
-import { SITE } from "@/shared/lib/constants/site.constant";
+import { formatNumber } from "@/shared/lib/utils/format.util";
+import type { LandingSection } from "@/shared/lib/types/api";
 import { Shell } from "@/shared/layout/shell";
 import { CheckCircleIcon, FileIcon, MonitorIcon } from "@/shared/ui/icons";
 
-import { SOLO_SERVICES } from "../_lib/constants/landing.constant";
+import { safeHref } from "../_lib/utils/landing.util";
 
 const ICONS = { monitor: MonitorIcon, file: FileIcon } as const;
 
 /** Sits directly under the package, sharing its surface, so it has no top padding. */
-export function SoloServices() {
+export function SoloServices({ section }: { section: LandingSection }) {
   return (
     <section id="services" className="bg-surface px-gutter pb-band">
       <Shell>
         <div className="flex items-center gap-4 pt-[clamp(30px,3.4vw,50px)]">
           <span className="h-px flex-1 bg-line" />
           <span className="font-display text-[15px] font-semibold whitespace-nowrap text-muted">
-            أو اطلب خدمة منفصلة
+            {section.title}
           </span>
           <span className="h-px flex-1 bg-line" />
         </div>
 
         <div className="mt-[clamp(22px,2.6vw,34px)] grid grid-cols-2 gap-[clamp(16px,2vw,26px)] max-[1150px]:grid-cols-1">
-          {SOLO_SERVICES.map((service) => {
-            const Icon = ICONS[service.icon];
+          {section.contents.map((service) => {
+            const Icon = ICONS[service.icon as keyof typeof ICONS] ?? MonitorIcon;
+            const ctaHref = safeHref(service.cta?.href);
 
             return (
               <div
-                key={service.title}
+                key={service.id}
                 className="relative overflow-hidden rounded-[14px] border border-line bg-white p-[clamp(20px,2.2vw,30px)] shadow-[0_14px_34px_rgba(13,86,242,.06)]"
               >
                 <span
@@ -57,36 +59,40 @@ export function SoloServices() {
                     <div className="mt-[clamp(16px,1.8vw,22px)] flex flex-wrap items-center justify-between gap-3.5">
                       <p className="flex items-baseline gap-1.5 whitespace-nowrap">
                         <span className="font-display text-[clamp(24px,2.2vw,32px)] leading-none font-bold text-brand">
-                          {service.price}
+                          {service.price != null && formatNumber(service.price)}
                         </span>
                         <span className="font-display text-[14.5px] font-semibold text-brand">
                           {service.currency}
                         </span>
                       </p>
-                      <CtaLink
-                        href={SITE.whatsapp}
-                        target="_blank"
-                        rel="noreferrer"
-                        tone="blue"
-                        size="md"
-                        className="rounded-[7px]"
-                      >
-                        {service.cta}
-                        <span aria-hidden className="text-[13px]">
-                          ‹
-                        </span>
-                      </CtaLink>
+                      {ctaHref && (
+                        <CtaLink
+                          href={ctaHref}
+                          target="_blank"
+                          rel="noreferrer"
+                          tone="blue"
+                          size="md"
+                          className="rounded-[7px]"
+                        >
+                          {service.cta?.label}
+                          <span aria-hidden className="text-[13px]">
+                            ‹
+                          </span>
+                        </CtaLink>
+                      )}
                     </div>
                   </div>
 
-                  <Image
-                    src={service.image.src}
-                    alt={service.image.alt}
-                    width={service.image.width}
-                    height={service.image.height}
-                    sizes="(max-width: 760px) 340px, (max-width: 1150px) 40vw, 20vw"
-                    className="h-auto w-full object-contain max-[760px]:order-first max-[760px]:mx-auto max-[760px]:max-w-[340px]"
-                  />
+                  {service.image?.src && (
+                    <Image
+                      src={service.image.src}
+                      alt={service.image.alt ?? ""}
+                      width={service.image.width ?? 1448}
+                      height={service.image.height ?? 1086}
+                      sizes="(max-width: 760px) 340px, (max-width: 1150px) 40vw, 20vw"
+                      className="h-auto w-full object-contain max-[760px]:order-first max-[760px]:mx-auto max-[760px]:max-w-[340px]"
+                    />
+                  )}
                 </div>
               </div>
             );

@@ -13,8 +13,11 @@ npm run typecheck
 npm run lint
 ```
 
-Copy `.env.example` to `.env.local` and set at least `NEXT_PUBLIC_WHATSAPP_URL` —
-it is the target of every button on the page.
+Copy `.env.example` to `.env.local` and set `API_URL` to the WAJHA API (`../backend`,
+e.g. `http://localhost:4000/api/v1`). All page copy, prices, contact details and
+portfolio projects come from that API, so run `npm run seed` there once and keep
+it running. Sign in to `/login` with the admin from the backend's `.env` to edit
+plans and projects.
 
 ## Design tokens
 
@@ -42,7 +45,7 @@ src/app/                             the router
   layout.tsx                         <html lang="ar" dir="rtl">, fonts, footer
   page.tsx                           composes the seven sections
   _components/                       one file per section
-  _lib/constants/landing.constant.ts all page copy
+  _lib/utils/landing.util.ts         picks a section out of the API response
 src/shared/                          code not tied to one section
   layout/ components/ ui/ lib/
 ```
@@ -87,9 +90,9 @@ kebab-case files, with the folder's suffix: `.provider.tsx`, `.skeleton.tsx`,
 
 ## Still to do
 
-- Replace the placeholder contact details in `.env.local`.
-- The four tiles in `نماذج من أعمالنا` are empty by design — add client
-  screenshots to `WORKS` in `landing.constant.ts`.
+- Edit the contact details (the API's `settings`) through the API; the dashboard
+  has no screen for them yet, nor for sections, contents and clients.
+- Project images are a path or URL typed into the project form; there is no upload.
 ## Header behaviour
 
 The design simply hid the nav links below 1120px; the build replaces that with a

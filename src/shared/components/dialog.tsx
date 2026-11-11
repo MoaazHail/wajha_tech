@@ -29,10 +29,10 @@ export function Dialog({ open, onClose, title, children }: DialogProps) {
       onClick={(event) => {
         if (event.target === ref.current) onClose();
       }}
-      className="m-auto w-[min(92vw,30rem)] rounded-lg bg-white p-0 text-ink shadow-[0_24px_60px_rgba(4,20,66,.35)] backdrop:bg-ink/50"
+      className="m-auto max-h-[92dvh] w-[min(94vw,30rem)] overflow-y-auto rounded-lg bg-white p-0 text-ink shadow-[0_24px_60px_rgba(4,20,66,.35)] backdrop:bg-ink/50"
     >
       {open && (
-        <div className="grid gap-5 p-6">
+        <div className="grid gap-5 p-4 sm:p-6">
           <div className="flex items-center justify-between gap-4">
             <h2 className="text-lg">{title}</h2>
             <button

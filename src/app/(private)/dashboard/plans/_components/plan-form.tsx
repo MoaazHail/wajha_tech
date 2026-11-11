@@ -1,19 +1,19 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useTransition } from "react";
 
 import { Dialog } from "@/shared/components/dialog";
+import type { Plan } from "@/shared/lib/types/api";
 
-import type { Plan } from "../../_lib/constants/dashboard-data.constant";
-
-type PlanInput = Omit<Plan, "id">;
+import type { PlanInput } from "../../_lib/schemes/plan.scheme";
+import type { ActionResult } from "../../_lib/types/action";
 
 interface PlanFormProps {
   open: boolean;
   /** The plan being edited; leave empty to add a new one. */
   plan?: Plan | null;
   onClose: () => void;
-  onSubmit: (data: PlanInput) => void;
+  onSubmit: (data: PlanInput) => Promise<ActionResult>;
 }
 
 const fieldClass =
@@ -29,66 +29,67 @@ export function PlanForm({ open, plan, onClose, onSubmit }: PlanFormProps) {
 }
 
 function FormBody({ plan, onClose, onSubmit }: Omit<PlanFormProps, "open">) {
-  const [name, setName] = useState(plan?.name ?? "");
-  const [price, setPrice] = useState(plan?.price ?? "");
-  const [orders, setOrders] = useState(String(plan?.orders ?? 0));
-  const [features, setFeatures] = useState(plan?.features.join("\n") ?? "");
+  const [title, setTitle] = useState(plan?.title ?? "");
+  const [price, setPrice] = useState(plan ? String(plan.price) : "");
+  const [benefits, setBenefits] = useState(plan?.benefits.join("\n") ?? "");
+  const [error, setError] = useState<string | null>(null);
+  const [pending, startTransition] = useTransition();
 
   return (
     <form
       className="grid gap-4"
       onSubmit={(event) => {
         event.preventDefault();
-        onSubmit({
-          name: name.trim(),
-          price: price.trim(),
-          currency: plan?.currency ?? "ريال",
-          orders: Number(orders) || 0,
-          features: features
-            .split("\n")
-            .map((line) => line.trim())
-            .filter(Boolean),
+        setError(null);
+
+        startTransition(async () => {
+          const result = await onSubmit({
+            title,
+            price: Number(price),
+            benefits: benefits
+              .split("\n")
+              .map((line) => line.trim())
+              .filter(Boolean),
+          });
+
+          if (result.ok) onClose();
+          else setError(result.error);
         });
       }}
     >
       <label className="grid gap-1.5 text-sm text-muted">
         اسم الخطة
-        <input required value={name} onChange={(event) => setName(event.target.value)} className={fieldClass} />
+        <input required value={title} onChange={(event) => setTitle(event.target.value)} className={fieldClass} />
       </label>
 
-      <div className="grid gap-4 sm:grid-cols-2">
-        <label className="grid gap-1.5 text-sm text-muted">
-          السعر (ريال)
-          <input
-            required
-            inputMode="numeric"
-            value={price}
-            onChange={(event) => setPrice(event.target.value)}
-            className={fieldClass}
-          />
-        </label>
-
-        <label className="grid gap-1.5 text-sm text-muted">
-          عدد الطلبات
-          <input
-            type="number"
-            min={0}
-            value={orders}
-            onChange={(event) => setOrders(event.target.value)}
-            className={fieldClass}
-          />
-        </label>
-      </div>
+      <label className="grid gap-1.5 text-sm text-muted">
+        السعر (ريال)
+        <input
+          required
+          type="number"
+          min={0}
+          inputMode="numeric"
+          value={price}
+          onChange={(event) => setPrice(event.target.value)}
+          className={fieldClass}
+        />
+      </label>
 
       <label className="grid gap-1.5 text-sm text-muted">
         المميزات (ميزة في كل سطر)
         <textarea
           rows={4}
-          value={features}
-          onChange={(event) => setFeatures(event.target.value)}
+          value={benefits}
+          onChange={(event) => setBenefits(event.target.value)}
           className={fieldClass}
         />
       </label>
+
+      {error && (
+        <p role="alert" className="text-sm text-red-600">
+          {error}
+        </p>
+      )}
 
       <div className="flex justify-end gap-2 pt-1">
         <button
@@ -100,7 +101,8 @@ function FormBody({ plan, onClose, onSubmit }: Omit<PlanFormProps, "open">) {
         </button>
         <button
           type="submit"
-          className="rounded-md bg-brand px-4 py-2 text-[15px] font-medium text-white transition-colors hover:bg-brand-dark"
+          disabled={pending}
+          className="rounded-md bg-brand px-4 py-2 text-[15px] font-medium text-white transition-colors hover:bg-brand-dark disabled:opacity-60"
         >
           {plan ? "حفظ" : "إضافة"}
         </button>

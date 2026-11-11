@@ -133,13 +133,13 @@ export function DataTable<T>({
   };
 
   return (
-    <div className="grid gap-3">
+    <div className="grid min-w-0 grid-cols-1 gap-3">
       {onAdd && (
         <div className="flex justify-start">
           <button
             type="button"
             onClick={onAdd}
-            className="inline-flex items-center gap-2 rounded-md bg-brand px-4 py-2.5 text-[15px] font-medium text-white transition-colors hover:bg-brand-dark"
+            className="inline-flex w-full items-center justify-center gap-2 sm:w-auto rounded-md bg-brand px-4 py-2.5 text-[15px] font-medium text-white transition-colors hover:bg-brand-dark"
           >
             <PlusIcon />
             {addLabel}
@@ -147,7 +147,7 @@ export function DataTable<T>({
         </div>
       )}
 
-      <div className={cn("overflow-x-auto rounded-lg border", t.wrapper)}>
+      <div className={cn("hidden overflow-x-auto rounded-lg border md:block", t.wrapper)}>
         <table className="w-full min-w-[640px] text-start text-[15px]">
           <thead className={cn("text-sm", t.head)}>
             <tr>
@@ -213,6 +213,64 @@ export function DataTable<T>({
           </tbody>
         </table>
       </div>
+
+      {/* Below md the table becomes a stack of cards: no horizontal scrolling on phones. */}
+      <ul className="grid grid-cols-1 gap-3 md:hidden">
+        {rows.length === 0 && (
+          <li className={cn("rounded-lg border px-4 py-10 text-center", t.wrapper, t.muted)}>{emptyText}</li>
+        )}
+        {rows.map((row) => (
+          <li
+            key={getRowId(row)}
+            onContextMenu={
+              hasMenu
+                ? (event) => {
+                    event.preventDefault();
+                    openMenu(row, event.clientX, event.clientY);
+                  }
+                : undefined
+            }
+            className={cn("relative grid gap-2.5 rounded-lg border p-4 text-[15px]", t.wrapper)}
+          >
+            {columns.map((column, index) => (
+              <div
+                key={column.key}
+                className={cn("flex items-start justify-between gap-4", index === 0 && hasMenu && "pe-10")}
+              >
+                <span className={cn("flex-none text-sm", t.muted)}>{column.header}</span>
+                <span
+                  className={cn(
+                    "min-w-0 break-words",
+                    column.strong ? cn("font-medium", t.strong) : t.muted,
+                    column.className,
+                    // Last, so every value lines up on the same edge whatever the column's table alignment is.
+                    "text-end",
+                  )}
+                >
+                  {column.cell(row, theme)}
+                </span>
+              </div>
+            ))}
+            {hasMenu && (
+              <button
+                type="button"
+                aria-label="إجراءات الصف"
+                aria-haspopup="menu"
+                onClick={(event) => {
+                  const rect = event.currentTarget.getBoundingClientRect();
+                  openMenu(row, rect.left, rect.bottom + 4);
+                }}
+                className={cn(
+                  "absolute end-2 top-2 flex size-9 items-center justify-center rounded-md transition-colors",
+                  t.more,
+                )}
+              >
+                <MoreIcon />
+              </button>
+            )}
+          </li>
+        ))}
+      </ul>
 
       {menu && (
         <div

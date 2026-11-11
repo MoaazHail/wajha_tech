@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useId, useState } from "react";
 
+import { logoutAction } from "@/shared/lib/actions/auth.action";
 import { DASHBOARD_NAV, type DashboardNavIcon } from "@/shared/lib/constants/dashboard.constant";
 import { cn } from "@/shared/lib/utils/cn.util";
 import { ChevronIcon, CloseIcon, LayoutIcon, MenuIcon } from "@/shared/ui/icons";
@@ -18,7 +19,7 @@ const NAV_ICONS: Record<DashboardNavIcon, typeof LayoutIcon> = {
  * below that it becomes an off-canvas drawer opened from a sticky top bar, with
  * an overlay, Escape to close and the page scroll locked while it is open.
  */
-export function DashboardSidebar() {
+export function DashboardSidebar({ adminName }: { adminName: string }) {
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
   const drawerId = useId();
@@ -79,10 +80,12 @@ export function DashboardSidebar() {
         id={drawerId}
         aria-label="قائمة لوحة التحكم"
         className={cn(
-          "z-50 flex w-72 flex-col bg-night text-white transition-[transform,visibility] duration-250 ease-out",
+          "z-50 flex w-72 flex-col bg-night text-white",
           "fixed inset-y-0 start-0 lg:sticky lg:top-0 lg:h-dvh lg:w-64 lg:flex-none",
-          // The closed state only applies below lg, so it can never hide the desktop column.
-          !open && "max-lg:invisible max-lg:ltr:-translate-x-full max-lg:rtl:translate-x-full",
+          // Closed below lg means display:none. Parking it off-screen with a transform widens the
+          // page on phones (the hidden box still counts as overflow), which shifts and clips the content.
+          !open && "max-lg:hidden",
+          open && "max-lg:animate-in max-lg:duration-200 max-lg:ltr:slide-in-from-left max-lg:rtl:slide-in-from-right",
         )}
       >
         <div className="flex h-16 items-center justify-between border-b border-white/10 px-5 lg:h-20">
@@ -131,6 +134,16 @@ export function DashboardSidebar() {
             <ChevronIcon direction="end" />
             العودة إلى الموقع
           </Link>
+
+          <form action={logoutAction} className="mt-1">
+            <button
+              type="submit"
+              className="flex w-full items-center gap-3 rounded-md px-4 py-3 text-start text-[15px] text-white/70 transition-colors hover:bg-white/5 hover:text-white"
+            >
+              تسجيل الخروج
+              <span className="ms-auto truncate text-xs text-white/40">{adminName}</span>
+            </button>
+          </form>
         </div>
       </aside>
     </>

@@ -3,7 +3,8 @@ import type { ComponentProps } from "react";
 
 import { cn } from "@/shared/lib/utils/cn.util";
 
-const ctaVariants = cva(
+/** Exported so a <button> that looks like a call to action can share the same styles. */
+export const ctaVariants = cva(
   "inline-flex items-center gap-2 font-display font-semibold transition-[transform,background-color,border-color] duration-150",
   {
     variants: {

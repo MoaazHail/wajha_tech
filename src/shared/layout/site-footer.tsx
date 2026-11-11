@@ -2,7 +2,9 @@ import {
   FOOTER_SERVICE_LINKS,
   MAIN_NAV,
 } from "@/shared/lib/constants/navigation.constant";
-import { EMAIL_HREF, PHONE_HREF, SITE } from "@/shared/lib/constants/site.constant";
+import { SITE } from "@/shared/lib/constants/site.constant";
+import type { Settings } from "@/shared/lib/types/api";
+import { emailHref, phoneHref } from "@/shared/lib/utils/format.util";
 import { Shell } from "@/shared/layout/shell";
 import { Logo } from "@/shared/ui/logo";
 import {
@@ -21,16 +23,18 @@ const SOCIAL = [
 
 const linkClass = "text-white/70 transition-colors hover:text-white";
 
-export function SiteFooter() {
+export function SiteFooter({ settings }: { settings: Settings | null }) {
   return (
     <footer className="bg-night px-gutter pb-[clamp(18px,2vw,28px)] text-white">
       <Shell>
         <div className="grid gap-[clamp(24px,3vw,44px)] pb-[clamp(28px,3.2vw,46px)] [grid-template-columns:repeat(auto-fit,minmax(190px,1fr))]">
           <div>
             <Logo size={34} compact className="text-white" />
-            <p className="mt-4 max-w-[22ch] text-[14.5px] leading-[1.85] text-white/70">
-              {SITE.tagline}
-            </p>
+            {settings?.tagline && (
+              <p className="mt-4 max-w-[22ch] text-[14.5px] leading-[1.85] text-white/70">
+                {settings.tagline}
+              </p>
+            )}
           </div>
 
           <nav aria-label="روابط سريعة">
@@ -47,20 +51,25 @@ export function SiteFooter() {
           <div>
             <h2 className="text-base font-semibold">تواصل معنا</h2>
             <div className="mt-3.5 grid gap-2.5 text-[14.5px] text-white/70">
-              <a href={PHONE_HREF} dir="ltr" className={`${linkClass} text-end font-mono tracking-[.02em]`}>
-                {SITE.phone}
-              </a>
-              <a href={EMAIL_HREF} dir="ltr" className={`${linkClass} text-end font-mono`}>
-                {SITE.email}
-              </a>
-              <span>{SITE.address}</span>
+              {settings?.phone && (
+                <a href={phoneHref(settings.phone)} dir="ltr" className={`${linkClass} text-end font-mono tracking-[.02em]`}>
+                  {settings.phone}
+                </a>
+              )}
+              {settings?.email && (
+                <a href={emailHref(settings.email)} dir="ltr" className={`${linkClass} text-end font-mono`}>
+                  {settings.email}
+                </a>
+              )}
+              {settings?.address && <span>{settings.address}</span>}
             </div>
 
+            {settings?.whatsapp && (
             <div className="mt-[18px] flex gap-2.5">
               {SOCIAL.map(({ label, Icon }) => (
                 <a
                   key={label}
-                  href={SITE.whatsapp}
+                  href={settings.whatsapp}
                   target="_blank"
                   rel="noreferrer"
                   aria-label={label}
@@ -70,6 +79,7 @@ export function SiteFooter() {
                 </a>
               ))}
             </div>
+            )}
           </div>
 
           <nav aria-label="خدماتنا">
@@ -85,7 +95,7 @@ export function SiteFooter() {
         </div>
 
         <div className="border-t border-white/12 pt-[clamp(14px,1.6vw,22px)] text-center text-[13.5px] text-white/60">
-          جميع الحقوق محفوظة © {SITE.foundedYear} {SITE.name}
+          جميع الحقوق محفوظة ©{settings?.foundedYear ? ` ${settings.foundedYear}` : ""} {SITE.name}
         </div>
       </Shell>
     </footer>

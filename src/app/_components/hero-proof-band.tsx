@@ -2,10 +2,30 @@ import Image from "next/image";
 
 import { ShieldCheckIcon } from "@/shared/ui/icons";
 
-import { HERO_AVATARS } from "../_lib/constants/landing.constant";
+import type { LandingSection } from "@/shared/lib/types/api";
 
-/** The gradient card under the hero buttons: track record, badge, client faces. */
-export function HeroProofBand() {
+/** Wraps every run of digits in the mono face the design uses for numbers. */
+function withMonoDigits(line: string) {
+  return line.split(/(\d+)/).map((part, index) =>
+    /^\d+$/.test(part) ? (
+      <span key={index} className="font-mono font-medium tracking-[.02em]">
+        {part}
+      </span>
+    ) : (
+      part
+    ),
+  );
+}
+
+/**
+ * The gradient card under the hero buttons: track record, badge, client faces.
+ * The first item carries the copy; every item with an image is a client face.
+ */
+export function HeroProofBand({ section }: { section: LandingSection }) {
+  const copy = section.contents.find((item) => item.title || item.body);
+  const avatars = section.contents.flatMap((item) => (item.image?.src ? [item.image.src] : []));
+  const lines = (copy?.title ?? "").split("\n");
+
   return (
     <div className="relative mt-[clamp(30px,3.2vw,44px)] max-w-[430px] overflow-hidden rounded-[18px] bg-[linear-gradient(115deg,#0B3AC9_0%,#0D4AE0_46%,#1A63FF_100%)] shadow-[0_18px_44px_rgba(4,20,66,.34)]">
       <svg
@@ -48,14 +68,16 @@ export function HeroProofBand() {
       <div className="relative flex flex-wrap items-center gap-3 px-[clamp(18px,2vw,24px)] py-[clamp(16px,1.8vw,22px)]">
         <div className="min-w-[min(170px,100%)] flex-[1_1_200px]">
           <p className="font-display text-[clamp(13.5px,1.05vw,15.5px)] leading-[1.55] font-bold tracking-[-0.01em] text-white">
-            تم تنفيذ أكثر من <span className="font-mono font-medium tracking-[.02em]">50</span> مَوقعًا
-            <br />
-            وبروفايل شركة باحترافية عالية
+            {lines.map((line, index) => (
+              <span key={index} className="block">
+                {withMonoDigits(line)}
+              </span>
+            ))}
           </p>
           <div className="mt-[11px] flex gap-[9px]">
             <i className="w-0.5 flex-none rounded-sm bg-[#8FB4FF]" />
             <p className="text-[clamp(12.5px,.95vw,13px)] leading-[1.6] whitespace-nowrap text-[#B9CCF7] max-[760px]:whitespace-normal">
-              حلول رقمية تزيد ثقة عميلك ومبيعاتك
+              {copy?.body}
             </p>
           </div>
         </div>
@@ -68,7 +90,7 @@ export function HeroProofBand() {
         </span>
 
         <div dir="ltr" className="flex flex-none items-center">
-          {HERO_AVATARS.map((src, index) => (
+          {avatars.map((src, index) => (
             <div
               key={src}
               className="size-11 overflow-hidden rounded-full border-2 border-white bg-[#3B77FA] shadow-[0_6px_16px_rgba(4,20,66,.3)] not-first:-ml-3"

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useId, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { CtaLink } from "@/shared/components/cta-link";
 import { useActiveSection } from "@/shared/hooks/use-active-section";
@@ -12,6 +12,9 @@ import { CloseIcon, MenuIcon } from "@/shared/ui/icons";
 import { Logo } from "@/shared/ui/logo";
 
 /** Module scope so the array identity is stable across renders. */
+/** One header per page, so a fixed id is safe, and it cannot differ between server and client renders. */
+const PANEL_ID = "site-menu-panel";
+
 const NAV_HREFS = MAIN_NAV.map((item) => item.href);
 
 /** The width at which the full link row still fits beside the logo and the CTA. */
@@ -23,10 +26,9 @@ const DESKTOP_QUERY = "(min-width: 1120px)";
  * The link matching the section in view is marked active, and clicking a link
  * marks it immediately rather than waiting for the smooth scroll to land.
  */
-export function SiteHeader() {
+export function SiteHeader({ whatsapp, isAdmin = false }: { whatsapp?: string; isAdmin?: boolean }) {
   const [open, setOpen] = useState(false);
   const { active, select } = useActiveSection(NAV_HREFS);
-  const panelId = useId();
   const headerRef = useRef<HTMLElement>(null);
 
   // Collapse the panel as soon as the desktop row is available again.
@@ -66,7 +68,7 @@ export function SiteHeader() {
   };
 
   return (
-    <header ref={headerRef} className="fixed inset-x-0 top-0 z-50 bg-brand px-gutter text-white">
+    <header ref={headerRef} className="fixed inset-x-0 top-(--admin-bar) z-50 bg-brand/80 px-gutter text-white backdrop-blur-md supports-[not(backdrop-filter:blur(1px))]:bg-brand">
       <Shell className="flex h-(--header-h) items-center justify-between gap-7">
         <a href="#top" onClick={() => handleSelect("#top")} aria-label={SITE.name}>
           <Logo size={40} animated />
@@ -99,23 +101,30 @@ export function SiteHeader() {
         </nav>
 
         <div className="flex flex-none items-center gap-2">
-          <CtaLink
-            href={SITE.whatsapp}
-            target="_blank"
-            rel="noreferrer"
-            tone="outline"
-            size="sm"
-            shape="square"
-            className="border-white/55 max-[640px]:hidden"
-          >
-            تواصل معنا
-          </CtaLink>
+          {isAdmin && (
+            <CtaLink href="/dashboard" tone="white" size="sm" shape="square" className="max-[640px]:hidden">
+              لوحة التحكم
+            </CtaLink>
+          )}
+          {whatsapp && (
+            <CtaLink
+              href={whatsapp}
+              target="_blank"
+              rel="noreferrer"
+              tone="outline"
+              size="sm"
+              shape="square"
+              className="border-white/55 max-[640px]:hidden"
+            >
+              تواصل معنا
+            </CtaLink>
+          )}
 
           <button
             type="button"
             onClick={() => setOpen((value) => !value)}
             aria-expanded={open}
-            aria-controls={panelId}
+            aria-controls={PANEL_ID}
             aria-label={open ? "إغلاق القائمة" : "فتح القائمة"}
             className="flex size-10 items-center justify-center rounded-md border border-white/55 text-white transition-colors hover:bg-white/12 min-[1120px]:hidden"
           >
@@ -126,9 +135,9 @@ export function SiteHeader() {
 
       {/* Drops below the bar, full width, on the same blue. */}
       <div
-        id={panelId}
+        id={PANEL_ID}
         hidden={!open}
-        className="absolute inset-x-0 top-full border-t border-white/15 bg-brand px-gutter pb-5 shadow-[0_18px_40px_rgba(4,20,66,.35)] min-[1120px]:hidden"
+        className="absolute inset-x-0 top-full border-t border-white/15 bg-brand/90 px-gutter backdrop-blur-md pb-5 shadow-[0_18px_40px_rgba(4,20,66,.35)] min-[1120px]:hidden"
       >
         <Shell>
           <nav aria-label="التنقل الرئيسي" className="grid gap-1 pt-3">
@@ -154,16 +163,23 @@ export function SiteHeader() {
             })}
           </nav>
 
-          <CtaLink
-            href={SITE.whatsapp}
-            target="_blank"
-            rel="noreferrer"
-            tone="white"
-            size="lg"
-            className="mt-4 w-full justify-center sm:hidden"
-          >
-            تواصل معنا
-          </CtaLink>
+          {isAdmin && (
+            <CtaLink href="/dashboard" tone="white" size="lg" className="mt-4 w-full justify-center sm:hidden">
+              لوحة التحكم
+            </CtaLink>
+          )}
+          {whatsapp && (
+            <CtaLink
+              href={whatsapp}
+              target="_blank"
+              rel="noreferrer"
+              tone="white"
+              size="lg"
+              className="mt-4 w-full justify-center sm:hidden"
+            >
+              تواصل معنا
+            </CtaLink>
+          )}
         </Shell>
       </div>
     </header>
