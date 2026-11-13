@@ -53,6 +53,26 @@ describe("booking page", () => {
     expect(screen.getAllByText("+966501111111").length).toBeGreaterThan(0);
   });
 
+  it("shows the phone number, and a dash when a booking has none", () => {
+    const { container } = render(<BookingManager bookings={bookings} />);
+    const table = within(container.querySelector("table")!);
+
+    expect(table.getByRole("columnheader", { name: "الجوال" })).toBeInTheDocument();
+    expect(table.getByText("+966501111111")).toBeInTheDocument();
+    expect(table.getByText("0502222222")).toBeInTheDocument();
+
+    // b2 has no phone and no note: both cells show "-".
+    const row = table.getByText("two@example.com").closest("tr")!;
+    expect(within(row).getAllByText("-")).toHaveLength(2);
+  });
+
+  it("treats a blank phone as missing", () => {
+    const blank: Booking[] = [{ id: "x", email: "x@example.com", phone: "   ", date: "2026-11-14T00:00:00.000Z", status: "pending" }];
+    const { container } = render(<BookingManager bookings={blank} />);
+    const row = within(container.querySelector("table")!).getByText("x@example.com").closest("tr")!;
+    expect(within(row).getAllByText("-").length).toBeGreaterThan(0);
+  });
+
   it("shows an accessible skeleton while loading", () => {
     render(<BookingLoading />);
     expect(screen.getByRole("status", { name: "جارٍ التحميل" })).toBeInTheDocument();
