@@ -10,7 +10,7 @@ import { addDays, formatDayLong, today } from "@/shared/lib/utils/date.util";
 import { bookMeetingAction, getTakenDaysAction } from "../_lib/actions/booking.action";
 import { bookingScheme, MAX_DAYS_AHEAD } from "../_lib/schemes/booking.scheme";
 
-const STEPS = ["اختر اليوم", "بريدك الإلكتروني", "تأكيد الحجز", "تم الحجز"] as const;
+const STEPS = ["اختر اليوم", "بياناتك", "تأكيد الحجز", "تم الحجز"] as const;
 
 const fieldClass =
   "w-full rounded-md border border-line bg-white px-3 py-2.5 text-[15px] text-ink outline-none transition-colors focus:border-brand";
@@ -37,6 +37,7 @@ function BookingFlow({ onClose }: { onClose: () => void }) {
   const [step, setStep] = useState(1);
   const [date, setDate] = useState("");
   const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
   /** Days another visitor already booked. They are greyed out so the same day cannot be chosen twice. */
@@ -61,17 +62,18 @@ function BookingFlow({ onClose }: { onClose: () => void }) {
   };
 
   const submitEmail = () => {
-    const parsed = bookingScheme.safeParse({ date, email });
+    const parsed = bookingScheme.safeParse({ date, email, phone });
     if (!parsed.success) return setError(parsed.error.issues[0]?.message ?? "بيانات غير صالحة");
 
     setEmail(parsed.data.email);
+    setPhone(parsed.data.phone);
     goTo(3);
   };
 
   const confirm = () =>
     startTransition(async () => {
       setError(null);
-      const result = await bookMeetingAction({ date, email });
+      const result = await bookMeetingAction({ date, email, phone });
       if (result.ok) return setStep(4);
 
       setError(result.error);
@@ -145,6 +147,25 @@ function BookingFlow({ onClose }: { onClose: () => void }) {
             />
           </label>
 
+          <label className="grid gap-1.5 text-sm text-muted">
+            رقم الجوال
+            <input
+              required
+              type="tel"
+              name="phone"
+              dir="ltr"
+              inputMode="tel"
+              autoComplete="tel"
+              placeholder="+966 50 123 4567"
+              value={phone}
+              onChange={(event) => {
+                setError(null);
+                setPhone(event.target.value);
+              }}
+              className={`${fieldClass} text-start`}
+            />
+          </label>
+
           {error && (
             <p role="alert" className="text-sm text-red-600">
               {error}
@@ -168,6 +189,10 @@ function BookingFlow({ onClose }: { onClose: () => void }) {
             هل أنت متأكد من حجز موعد يوم <strong>{formatDayLong(date)}</strong>؟ سنرسل رسالة تأكيد إلى{" "}
             <strong dir="ltr" className="break-all font-mono">
               {email}
+            </strong>
+            ، وسنتواصل معك على الجوال{" "}
+            <strong dir="ltr" className="font-mono">
+              {phone}
             </strong>
             .
           </p>

@@ -31,9 +31,9 @@ import BookingLoading from "./loading";
 import BookingPage from "./page";
 
 const bookings: Booking[] = [
-  { id: "b1", email: "one@example.com", date: "2026-11-14T00:00:00.000Z", status: "pending", note: "اتصال صباحاً" },
-  { id: "b2", email: "two@example.com", date: "2026-11-20T00:00:00.000Z", status: "confirmed" },
-  { id: "b3", email: "three@example.com", date: "2026-11-02T00:00:00.000Z", status: "cancelled" },
+  { id: "b1", email: "one@example.com", phone: "+966501111111", date: "2026-11-14T00:00:00.000Z", status: "pending", note: "اتصال صباحاً" },
+  { id: "b2", email: "two@example.com", phone: "", date: "2026-11-20T00:00:00.000Z", status: "confirmed" },
+  { id: "b3", email: "three@example.com", phone: "0502222222", date: "2026-11-02T00:00:00.000Z", status: "cancelled" },
 ];
 
 beforeEach(() => {
@@ -50,6 +50,7 @@ describe("booking page", () => {
     expect(screen.getAllByText("one@example.com").length).toBeGreaterThan(0);
     expect(screen.getAllByText("2026-11-14").length).toBeGreaterThan(0);
     expect(screen.getAllByText("اتصال صباحاً").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("+966501111111").length).toBeGreaterThan(0);
   });
 
   it("shows an accessible skeleton while loading", () => {
@@ -97,6 +98,7 @@ describe("create", () => {
     const dialog = open();
 
     fireEvent.change(within(dialog).getByLabelText("البريد الإلكتروني"), { target: { value: "new@example.com" } });
+    fireEvent.change(within(dialog).getByLabelText("رقم الجوال"), { target: { value: "+966 50 999 8888" } });
     fireEvent.click(within(dialog).getByRole("button", { name: /^\d{4}-\d{2}-15$/ }));
     fireEvent.change(within(dialog).getByLabelText("الحالة"), { target: { value: "confirmed" } });
     fireEvent.change(within(dialog).getByLabelText("ملاحظة (للفريق فقط)"), { target: { value: "VIP" } });
@@ -105,6 +107,7 @@ describe("create", () => {
     await waitFor(() =>
       expect(mocks.actions.createBookingEntryAction).toHaveBeenCalledWith({
         email: "new@example.com",
+        phone: "+966 50 999 8888",
         date: expect.stringMatching(/^\d{4}-\d{2}-15$/),
         status: "confirmed",
         note: "VIP",
@@ -131,6 +134,7 @@ describe("update", () => {
 
     const dialog = screen.getByRole("heading", { name: "تعديل الحجز" }).closest("dialog")!;
     expect(within(dialog).getByLabelText("البريد الإلكتروني")).toHaveValue("one@example.com");
+    expect(within(dialog).getByLabelText("رقم الجوال")).toHaveValue("+966501111111");
     expect(within(dialog).getByLabelText("الحالة")).toHaveValue("pending");
     expect(within(dialog).getByRole("button", { name: "2026-11-14" })).toHaveAttribute("aria-pressed", "true");
 
@@ -218,7 +222,7 @@ describe("days held by another booking", () => {
 });
 
 describe("bookingEntryScheme / status labels", () => {
-  const valid = { email: "a@b.co", date: "2026-01-02", status: "pending" as const, note: "" };
+  const valid = { email: "a@b.co", phone: "", date: "2026-01-02", status: "pending" as const, note: "" };
 
   it("accepts a past day (the dashboard records history)", () => {
     expect(bookingEntryScheme.safeParse({ ...valid, date: "2020-05-05" }).success).toBe(true);
@@ -229,6 +233,13 @@ describe("bookingEntryScheme / status labels", () => {
     expect(bookingEntryScheme.safeParse({ ...valid, date: "2026-02-30" }).success).toBe(false);
     expect(bookingEntryScheme.safeParse({ ...valid, status: "done" }).success).toBe(false);
     expect(bookingEntryScheme.safeParse({ ...valid, note: "x".repeat(501) }).success).toBe(false);
+  });
+
+  it("treats the phone as optional but validates it when given", () => {
+    expect(bookingEntryScheme.safeParse({ ...valid, phone: "" }).success).toBe(true);
+    expect(bookingEntryScheme.safeParse({ ...valid, phone: "+966 50 123 4567" }).success).toBe(true);
+    expect(bookingEntryScheme.safeParse({ ...valid, phone: "12" }).success).toBe(false);
+    expect(bookingEntryScheme.safeParse({ ...valid, phone: "<script>" }).success).toBe(false);
   });
 
   it("has a label for every status", () => {

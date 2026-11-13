@@ -16,6 +16,7 @@ import { BookingModal } from "./booking-modal";
 
 const pickDay = (day: string) => fireEvent.click(screen.getByRole("button", { name: day }));
 const typeEmail = (value: string) => fireEvent.change(screen.getByLabelText("بريدك الإلكتروني"), { target: { value } });
+const typePhone = (value: string) => fireEvent.change(screen.getByLabelText("رقم الجوال"), { target: { value } });
 const currentStep = () => document.querySelector('[aria-current="step"]')?.textContent ?? "";
 
 describe("BookingModal", () => {
@@ -45,7 +46,7 @@ describe("BookingModal", () => {
     render(<BookingModal open onClose={() => {}} />);
     pickDay(tomorrow);
 
-    expect(currentStep()).toContain("2: بريدك الإلكتروني");
+    expect(currentStep()).toContain("2: بياناتك");
     expect(screen.getByLabelText("بريدك الإلكتروني")).toBeInTheDocument();
     expect(screen.queryByRole("grid")).not.toBeInTheDocument();
   });
@@ -73,15 +74,34 @@ describe("BookingModal", () => {
     expect(mocks.book).not.toHaveBeenCalled();
   });
 
+  it("requires a valid phone number before moving on", () => {
+    render(<BookingModal open onClose={() => {}} />);
+    pickDay(tomorrow);
+    typeEmail("a@b.co");
+
+    fireEvent.click(screen.getByRole("button", { name: "التالي" }));
+    expect(screen.getByRole("alert")).toHaveTextContent("رقم الجوال مطلوب");
+
+    for (const bad of ["123", "abc12345678", "<b>0501234567", "+".concat("9".repeat(16))]) {
+      typePhone(bad);
+      fireEvent.click(screen.getByRole("button", { name: "التالي" }));
+      expect(screen.getByRole("alert")).toHaveTextContent("رقم الجوال");
+    }
+    expect(currentStep()).toContain("2:");
+    expect(mocks.book).not.toHaveBeenCalled();
+  });
+
   it("asks for confirmation before sending anything", () => {
     render(<BookingModal open onClose={() => {}} />);
     pickDay(tomorrow);
     typeEmail("  visitor@example.com ");
+    typePhone("+966 50 123 4567");
     fireEvent.click(screen.getByRole("button", { name: "التالي" }));
 
     expect(currentStep()).toContain("3: تأكيد الحجز");
     expect(screen.getByText(/هل أنت متأكد من حجز موعد/)).toBeInTheDocument();
     expect(screen.getByText("visitor@example.com")).toBeInTheDocument();
+    expect(screen.getByText("+966 50 123 4567")).toBeInTheDocument();
     expect(mocks.book).not.toHaveBeenCalled();
   });
 
@@ -89,6 +109,7 @@ describe("BookingModal", () => {
     render(<BookingModal open onClose={() => {}} />);
     pickDay(tomorrow);
     typeEmail("a@b.co");
+    typePhone("+966 50 123 4567");
     fireEvent.click(screen.getByRole("button", { name: "التالي" }));
     fireEvent.click(screen.getByRole("button", { name: "لا، رجوع" }));
 
@@ -100,10 +121,11 @@ describe("BookingModal", () => {
     render(<BookingModal open onClose={() => {}} />);
     pickDay(tomorrow);
     typeEmail("a@b.co");
+    typePhone("+966 50 123 4567");
     fireEvent.click(screen.getByRole("button", { name: "التالي" }));
     fireEvent.click(screen.getByRole("button", { name: "نعم، أكّد الحجز" }));
 
-    await waitFor(() => expect(mocks.book).toHaveBeenCalledWith({ date: tomorrow, email: "a@b.co" }));
+    await waitFor(() => expect(mocks.book).toHaveBeenCalledWith({ date: tomorrow, email: "a@b.co", phone: "+966 50 123 4567" }));
     expect(await screen.findByRole("status")).toHaveTextContent("تم استلام طلبك");
     expect(currentStep()).toContain("4: تم الحجز");
   });
@@ -113,6 +135,7 @@ describe("BookingModal", () => {
     render(<BookingModal open onClose={() => {}} />);
     pickDay(tomorrow);
     typeEmail("a@b.co");
+    typePhone("+966 50 123 4567");
     fireEvent.click(screen.getByRole("button", { name: "التالي" }));
     fireEvent.click(screen.getByRole("button", { name: "نعم، أكّد الحجز" }));
 
@@ -131,6 +154,7 @@ describe("BookingModal", () => {
     render(<BookingModal open onClose={onClose} />);
     pickDay(tomorrow);
     typeEmail("a@b.co");
+    typePhone("+966 50 123 4567");
     fireEvent.click(screen.getByRole("button", { name: "التالي" }));
     fireEvent.click(screen.getByRole("button", { name: "نعم، أكّد الحجز" }));
     fireEvent.click(await screen.findByText("إغلاق"));
@@ -185,6 +209,7 @@ describe("BookingModal: days booked by someone else", () => {
 
     pickDay(free);
     typeEmail("a@b.co");
+    typePhone("+966 50 123 4567");
     fireEvent.click(screen.getByRole("button", { name: "التالي" }));
     fireEvent.click(screen.getByRole("button", { name: "نعم، أكّد الحجز" }));
 
@@ -212,7 +237,7 @@ describe("BookingButton", () => {
 });
 
 describe("bookingScheme", () => {
-  const ok = { date: addDays(today(), 1), email: "a@b.co" };
+  const ok = { date: addDays(today(), 1), email: "a@b.co", phone: "+966501234567" };
 
   it("accepts today and the last allowed day", () => {
     expect(bookingScheme.safeParse({ ...ok, date: today() }).success).toBe(true);
@@ -224,6 +249,15 @@ describe("bookingScheme", () => {
     expect(bookingScheme.safeParse({ ...ok, date: addDays(today(), 91) }).success).toBe(false);
     expect(bookingScheme.safeParse({ ...ok, date: "2026-02-30" }).success).toBe(false);
     expect(bookingScheme.safeParse({ ...ok, date: "" }).success).toBe(false);
+  });
+
+  it("requires a phone of 7 to 15 digits with only phone characters", () => {
+    for (const phone of ["+966 50 123 4567", "0501234567", "(050) 123-4567"]) {
+      expect(bookingScheme.safeParse({ ...ok, phone }).success, phone).toBe(true);
+    }
+    for (const phone of ["", "123", "abc12345678", "<b>0501234567", "+".concat("9".repeat(16)), "050 123 4567 ext 9"]) {
+      expect(bookingScheme.safeParse({ ...ok, phone }).success, phone).toBe(false);
+    }
   });
 
   it("applies the shared email rules", () => {
@@ -247,7 +281,7 @@ describe("getTakenDaysAction", () => {
 
   it("flags a 409 as a conflict and keeps the API message", async () => {
     mocks.createBooking.mockRejectedValue(new ApiError("هذا اليوم محجوز، اختر يوماً آخر", 409));
-    const result = await (await load()).bookMeetingAction({ date: addDays(today(), 1), email: "a@b.co" });
+    const result = await (await load()).bookMeetingAction({ date: addDays(today(), 1), email: "a@b.co", phone: "+966501234567" });
     expect(result).toEqual({ ok: false, error: "هذا اليوم محجوز، اختر يوماً آخر", conflict: true });
   });
 });
@@ -255,7 +289,7 @@ describe("getTakenDaysAction", () => {
 describe("bookMeetingAction", () => {
   // The real action, with the API call mocked.
   const load = () => vi.importActual<typeof import("../_lib/actions/booking.action")>("../_lib/actions/booking.action");
-  const input = { date: addDays(today(), 1), email: "a@b.co" };
+  const input = { date: addDays(today(), 1), email: "a@b.co", phone: "+966501234567" };
 
   it("rejects invalid input without calling the API", async () => {
     const { bookMeetingAction } = await load();

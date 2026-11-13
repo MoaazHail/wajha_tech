@@ -10,6 +10,7 @@ export function BookingStatusBadge({ status }: { status: Booking["status"] }) {
 
 export const BOOKING_COLUMNS: ReadonlyArray<DataTableColumn<Booking>> = [
   { key: "email", header: "البريد الإلكتروني", cell: (row) => row.email, strong: true, className: "ltr text-start" },
+  { key: "phone", header: "الجوال", cell: (row) => row.phone || "—", className: "ltr text-start" },
   { key: "date", header: "اليوم", cell: (row) => row.date.slice(0, 10), className: "ltr text-start" },
   { key: "status", header: "الحالة", cell: (row) => <BookingStatusBadge status={row.status} /> },
   { key: "note", header: "ملاحظة", cell: (row) => row.note || "—", className: "md:max-w-[28ch] md:truncate" },

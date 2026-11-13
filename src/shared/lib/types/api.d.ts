@@ -121,6 +121,8 @@ export type BookingStatus = "pending" | "confirmed" | "cancelled";
 export interface Booking {
   id: string;
   email: string;
+  /** Empty for bookings made before the phone field existed. */
+  phone: string;
   /** ISO date; the picked day at 00:00 UTC. */
   date: string;
   status: BookingStatus;

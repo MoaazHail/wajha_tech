@@ -85,6 +85,7 @@ export const updateSettings = (body: SettingsPayload) => adminRequest<Settings>(
 
 export interface BookingPayload {
   email: string;
+  phone: string;
   /** `YYYY-MM-DD` */
   date: string;
   status: Booking["status"];

@@ -9,7 +9,7 @@ export const listTakenDays = () => apiRequest<string[]>("/public/bookings/taken"
 
 /** Public endpoint: saves the request and emails the visitor and the agency. Never cached. */
 export const createBooking = (body: BookingInput) =>
-  apiRequest<{ id: string; date: string; email: string }>("/public/bookings", {
+  apiRequest<{ id: string; date: string; email: string; phone: string }>("/public/bookings", {
     method: "POST",
     body,
     revalidate: 0,

@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 import { emailField } from "@/shared/lib/schemes/auth.scheme";
+import { phoneField } from "@/shared/lib/schemes/contact.scheme";
 import { addDays, parseDay, today } from "@/shared/lib/utils/date.util";
 
 /** How far ahead a visitor may book. The API enforces the same limit. */
@@ -15,6 +16,7 @@ export const bookingDateScheme = z
 export const bookingScheme = z.object({
   date: bookingDateScheme,
   email: emailField,
+  phone: phoneField,
 });
 
 export type BookingInput = z.infer<typeof bookingScheme>;

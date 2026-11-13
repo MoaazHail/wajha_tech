@@ -26,6 +26,7 @@ const fieldClass =
 
 const toInput = (booking?: Booking | null): BookingEntryInput => ({
   email: booking?.email ?? "",
+  phone: booking?.phone ?? "",
   date: booking ? booking.date.slice(0, 10) : today(),
   status: booking?.status ?? "pending",
   note: booking?.note ?? "",
@@ -80,6 +81,18 @@ function FormBody({ booking, bookings, onClose, onSubmit }: Omit<BookingFormProp
           dir="ltr"
           value={values.email}
           onChange={(event) => set("email", event.target.value)}
+          className={`${fieldClass} text-start`}
+        />
+      </label>
+
+      <label className="grid gap-1.5 text-sm text-muted">
+        رقم الجوال
+        <input
+          type="tel"
+          dir="ltr"
+          inputMode="tel"
+          value={values.phone}
+          onChange={(event) => set("phone", event.target.value)}
           className={`${fieldClass} text-start`}
         />
       </label>
