@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef } from "react";
+import { useRef, useState } from "react";
 
 import Image from "next/image";
 import Link from "next/link";
@@ -54,9 +54,7 @@ export function WorkRail({ section, projects }: WorkRailProps) {
                 const live = safeHref(project.live);
                 const tile = (
                   <>
-                    {project.bio_image && (
-                      <Image src={project.bio_image} alt={project.title} height={300} width={300} />
-                    )}
+                    <ProjectImage src={project.bio_image} title={project.title} />
                     <figcaption className="mt-3 text-center text-[14.5px] font-medium text-white/85">
                       {project.title}
                     </figcaption>
@@ -98,5 +96,36 @@ export function WorkRail({ section, projects }: WorkRailProps) {
         </div>
       </Shell>
     </section>
+  );
+}
+
+/**
+ * The project's picture, or a branded placeholder when there is none or it fails to load
+ * (for example an upload whose file no longer exists), so visitors never see a broken-image icon.
+ */
+export function ProjectImage({ src, title }: { src?: string; title: string }) {
+  const [failed, setFailed] = useState(false);
+
+  if (!src || failed) {
+    return (
+      <div
+        role="img"
+        aria-label={title}
+        className="flex aspect-square w-full items-center justify-center rounded-lg bg-[linear-gradient(135deg,#0d56f2,#0b2f8a)] font-display text-5xl font-bold text-white/90"
+      >
+        {title.trim().charAt(0) || "W"}
+      </div>
+    );
+  }
+
+  return (
+    <Image
+      src={src}
+      alt={title}
+      width={300}
+      height={300}
+      onError={() => setFailed(true)}
+      className="aspect-square w-full rounded-lg object-cover"
+    />
   );
 }

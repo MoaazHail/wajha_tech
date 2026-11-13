@@ -114,6 +114,19 @@ describe("landing sections", () => {
     fireEvent.click(screen.getByLabelText("السابق"));
   });
 
+  it("WorkRail shows a placeholder instead of a broken image when the file fails or is missing", () => {
+    render(<WorkRail section={get("portfolio")} projects={projects} />);
+
+    // p2 has no image at all: placeholder straight away.
+    expect(screen.getByRole("img", { name: "بروفايل نخبة" })).toHaveTextContent("ب");
+
+    // p1's image fails to load (e.g. a 404 from the API): it is swapped for the placeholder.
+    const img = screen.getByAltText("موقع عيادة الأمل");
+    fireEvent.error(img);
+    expect(screen.queryByAltText("موقع عيادة الأمل")).not.toBeInTheDocument();
+    expect(screen.getByRole("img", { name: "موقع عيادة الأمل" })).toHaveTextContent("م");
+  });
+
   it("WorkRail copes with no projects", () => {
     render(<WorkRail section={get("portfolio")} projects={[]} />);
     expect(screen.getByRole("heading", { name: "نماذج من أعمالنا" })).toBeInTheDocument();

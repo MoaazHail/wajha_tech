@@ -12,7 +12,7 @@ const apiOrigin = process.env.API_URL ? new URL(process.env.API_URL).origin : nu
 const nextConfig: NextConfig = {
   poweredByHeader: false,
   experimental: {
-    // Server Actions default to 1 MB; project images are accepted up to 5 MB.
+    // Server Actions default to 1 MB; project images are accepted up to 4 MB (Vercel caps request bodies at 4.5 MB).
     serverActions: { bodySizeLimit: "6mb" },
   },
   // Uploaded images are stored by the API. Proxying keeps them same-origin, so next/image treats them as local files.

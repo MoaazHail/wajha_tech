@@ -137,8 +137,8 @@ describe("uploadImageAction", () => {
     expect(result).toEqual({ ok: false, error: "الملف يجب أن يكون صورة" });
   });
 
-  it("rejects files over 5 MB", async () => {
-    const big = new File([new Uint8Array(5 * 1024 * 1024 + 1)], "a.png", { type: "image/png" });
+  it("rejects files over 4 MB", async () => {
+    const big = new File([new Uint8Array(4 * 1024 * 1024 + 1)], "a.png", { type: "image/png" });
     const result = await uploadImageAction(form(big));
     expect(result.ok).toBe(false);
     expect(api.uploadImage).not.toHaveBeenCalled();

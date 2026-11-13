@@ -33,19 +33,23 @@ async function loadIsAdmin(): Promise<boolean> {
 export async function generateMetadata(): Promise<Metadata> {
   const settings = await loadSettings();
   const title = `${SITE.name} — تصميم مواقع وبروفايلات شركات`;
+  // The dashboard text wins; the built-in one keeps the link preview (WhatsApp, X, Telegram) from being empty.
+  const description = settings?.description || SITE.description;
 
   return {
     metadataBase: new URL(SITE.url),
     title: { default: title, template: `%s | ${SITE.name}` },
-    description: settings?.description,
+    description,
+    alternates: { canonical: "/" },
     openGraph: {
       type: "website",
       locale: SITE.locale,
       siteName: SITE.name,
-      url: SITE.url,
+      url: "/",
       title,
-      description: settings?.description,
+      description,
     },
+    twitter: { card: "summary_large_image", title, description },
   };
 }
 
